@@ -45,8 +45,11 @@ func main() {
 	var ch byte = 'A'
 	fmt.Printf("%d - %c - %X - %U\n", ch, ch, ch, ch)
 
-	// 数组与切片
+	// 布尔类型
+	var result bool = true
+	fmt.Println(result)
 
+	// 数组与切片
 	var s1 = make([]int, 5)
 	var s2 = make([]int, 5, 10)
 	var a = []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
