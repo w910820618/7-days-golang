@@ -1,6 +1,7 @@
 package main
 
 import (
+	"7-days-golang/two-project/lib"
 	"fmt"
 )
 
@@ -60,4 +61,7 @@ func main() {
 	s1[3] = 100
 	fmt.Println(s1)
 	fmt.Println(s2)
+
+	// 包的引用
+	lib.Run()
 }
