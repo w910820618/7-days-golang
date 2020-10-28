@@ -267,11 +267,632 @@ import 导入语句通常放在源码文件开头包声明语句的下面；
 
 ## 语言顺序编程
 ### 流程控制
+
+流程控制在编程语言中是最伟大的发明了，因为有了它，你可以通过很简单的流程描述来表达很复杂的逻辑。Go中流程控制分三大类：条件判断，循环控制和无条件跳转。
+
+### if
+
+`if`也许是各种编程语言中最常见的了，它的语法概括起来就是：如果满足条件就做某事，否则做另一件事。
+
+Go里面`if`条件判断语句中不需要括号，如下代码所示
+
+```Go
+if x > 10 {
+	fmt.Println("x is greater than 10")
+} else {
+	fmt.Println("x is less than 10")
+}
+```
+
+Go的`if`还有一个强大的地方就是条件判断语句里面允许声明一个变量，这个变量的作用域只能在该条件逻辑块内，其他地方就不起作用了，如下所示
+
+```Go
+// 计算获取值x,然后根据x返回的大小，判断是否大于10。
+if x := computedValue(); x > 10 {
+	fmt.Println("x is greater than 10")
+} else {
+	fmt.Println("x is less than 10")
+}
+
+//这个地方如果这样调用就编译出错了，因为x是条件里面的变量
+fmt.Println(x)
+```
+
+多个条件的时候如下所示：
+
+```Go
+if integer == 3 {
+	fmt.Println("The integer is equal to 3")
+} else if integer < 3 {
+	fmt.Println("The integer is less than 3")
+} else {
+	fmt.Println("The integer is greater than 3")
+}
+```
+
+### goto
+
+Go有`goto`语句——请明智地使用它。用`goto`跳转到必须在当前函数内定义的标签。例如假设这样一个循环：
+
+```Go
+func myFunc() {
+	i := 0
+Here:   //这行的第一个词，以冒号结束作为标签
+	println(i)
+	i++
+	goto Here   //跳转到Here去
+}
+```
+
+>标签名是大小写敏感的。
+
+### for
+
+Go里面最强大的一个控制逻辑就是`for`，它既可以用来循环读取数据，又可以当作`while`来控制逻辑，还能迭代操作。它的语法如下：
+
+```Go
+for expression1; expression2; expression3 {
+	//...
+}
+```
+
+`expression1`、`expression2`和`expression3`都是表达式，其中`expression1`和`expression3`是变量声明或者函数调用返回值之类的，`expression2`是用来条件判断，`expression1`在循环开始之前调用，`expression3`在每轮循环结束之时调用。
+
+一个例子比上面讲那么多更有用，那么我们看看下面的例子吧：
+
+```Go
+package main
+
+import "fmt"
+
+func main(){
+	sum := 0;
+	for index:=0; index < 10 ; index++ {
+		sum += index
+	}
+	fmt.Println("sum is equal to ", sum)
+}
+// 输出：sum is equal to 45
+```
+
+有些时候需要进行多个赋值操作，由于Go里面没有`,`操作符，那么可以使用平行赋值`i, j = i+1, j-1`
+
+
+有些时候如果我们忽略`expression1`和`expression3`：
+
+```Go
+sum := 1
+for ; sum < 1000;  {
+	sum += sum
+}
+```
+
+其中`;`也可以省略，那么就变成如下的代码了，是不是似曾相识？对，这就是`while`的功能。
+
+```Go
+sum := 1
+for sum < 1000 {
+	sum += sum
+}
+```
+
+在循环里面有两个关键操作`break`和`continue`	,`break`操作是跳出当前循环，`continue`是跳过本次循环。当嵌套过深的时候，`break`可以配合标签使用，即跳转至标签所指定的位置，详细参考如下例子：
+
+```Go
+for index := 10; index>0; index-- {
+	if index == 5{
+		break // 或者continue
+	}
+	fmt.Println(index)
+}
+// break打印出来10、9、8、7、6
+// continue打印出来10、9、8、7、6、4、3、2、1
+```
+
+`break`和`continue`还可以跟着标号，用来跳到多重循环中的外层循环
+
+`for`配合`range`可以用于读取`slice`和`map`的数据：
+
+```Go
+for k,v:=range map {
+	fmt.Println("map's key:",k)
+	fmt.Println("map's val:",v)
+}
+```
+
+由于 Go 支持 “多值返回”, 而对于“声明而未被调用”的变量, 编译器会报错, 在这种情况下, 可以使用`_`来丢弃不需要的返回值
+例如
+
+```Go
+for _, v := range map{
+	fmt.Println("map's val:", v)
+}
+
+```
+
+### switch
+
+有些时候你需要写很多的`if-else`来实现一些逻辑处理，这个时候代码看上去就很丑很冗长，而且也不易于以后的维护，这个时候`switch`就能很好的解决这个问题。它的语法如下
+
+```Go
+switch sExpr {
+case expr1:
+	some instructions
+case expr2:
+	some other instructions
+case expr3:
+	some other instructions
+default:
+	other code
+}
+```
+
+`sExpr`和`expr1`、`expr2`、`expr3`的类型必须一致。Go的`switch`非常灵活，表达式不必是常量或整数，执行的过程从上至下，直到找到匹配项；而如果`switch`没有表达式，它会匹配`true`。
+
+```Go
+i := 10
+switch i {
+case 1:
+	fmt.Println("i is equal to 1")
+case 2, 3, 4:
+	fmt.Println("i is equal to 2, 3 or 4")
+case 10:
+	fmt.Println("i is equal to 10")
+default:
+	fmt.Println("All I know is that i is an integer")
+}
+```
+
+在第5行中，我们把很多值聚合在了一个`case`里面，同时，Go里面`switch`默认相当于每个`case`最后带有`break`，匹配成功后不会自动向下执行其他case，而是跳出整个`switch`, 但是可以使用`fallthrough`强制执行后面的case代码。
+
+```Go
+integer := 6
+switch integer {
+case 4:
+	fmt.Println("The integer was <= 4")
+	fallthrough
+case 5:
+	fmt.Println("The integer was <= 5")
+	fallthrough
+case 6:
+	fmt.Println("The integer was <= 6")
+	fallthrough
+case 7:
+	fmt.Println("The integer was <= 7")
+	fallthrough
+case 8:
+	fmt.Println("The integer was <= 8")
+	fallthrough
+default:
+	fmt.Println("default case")
+}
+```
+
+上面的程序将输出
+
+```Go
+The integer was <= 6
+The integer was <= 7
+The integer was <= 8
+default case
+
+```
+
 ### 函数
+
+函数是Go里面的核心设计，它通过关键字`func`来声明，它的格式如下：
+
+```Go
+func funcName(input1 type1, input2 type2) (output1 type1, output2 type2) {
+	//这里是处理逻辑代码
+	//返回多个值
+	return value1, value2
+}
+```
+
+上面的代码我们看出
+
+- 关键字`func`用来声明一个函数`funcName`
+- 函数可以有一个或者多个参数，每个参数后面带有类型，通过`,`分隔
+- 函数可以返回多个值
+- 上面返回值声明了两个变量`output1`和`output2`，如果你不想声明也可以，直接就两个类型
+- 如果只有一个返回值且不声明返回值变量，那么你可以省略 包括返回值 的括号
+- 如果没有返回值，那么就直接省略最后的返回信息
+- 如果有返回值， 那么必须在函数的外层添加return语句
+
+下面我们来看一个实际应用函数的例子（用来计算Max值）
+
+```Go
+package main
+
+import "fmt"
+
+// 返回a、b中最大值.
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func main() {
+	x := 3
+	y := 4
+	z := 5
+
+	max_xy := max(x, y) //调用函数max(x, y)
+	max_xz := max(x, z) //调用函数max(x, z)
+
+	fmt.Printf("max(%d, %d) = %d\n", x, y, max_xy)
+	fmt.Printf("max(%d, %d) = %d\n", x, z, max_xz)
+	fmt.Printf("max(%d, %d) = %d\n", y, z, max(y,z)) // 也可在这直接调用它
+}
+```
+
+上面这个里面我们可以看到`max`函数有两个参数，它们的类型都是`int`，那么第一个变量的类型可以省略（即 a,b int,而非 a int, b int)，默认为离它最近的类型，同理多于2个同类型的变量或者返回值。同时我们注意到它的返回值就是一个类型，这个就是省略写法。
+
+### 多个返回值
+
+Go语言比C更先进的特性，其中一点就是函数能够返回多个值。
+
+我们直接上代码看例子
+
+```Go
+package main
+
+import "fmt"
+
+//返回 A+B 和 A*B
+func SumAndProduct(A, B int) (int, int) {
+	return A+B, A*B
+}
+
+func main() {
+	x := 3
+	y := 4
+
+	xPLUSy, xTIMESy := SumAndProduct(x, y)
+
+	fmt.Printf("%d + %d = %d\n", x, y, xPLUSy)
+	fmt.Printf("%d * %d = %d\n", x, y, xTIMESy)
+}
+```
+
+上面的例子我们可以看到直接返回了两个参数，当然我们也可以命名返回参数的变量，这个例子里面只是用了两个类型，我们也可以改成如下这样的定义，然后返回的时候不用带上变量名，因为直接在函数里面初始化了。但如果你的函数是导出的(首字母大写)，官方建议：最好命名返回值，因为不命名返回值，虽然使得代码更加简洁了，但是会造成生成的文档可读性差。
+
+```Go
+func SumAndProduct(A, B int) (add int, Multiplied int) {
+	add = A+B
+	Multiplied = A*B
+	return
+}
+```
+
+### 变参
+
+Go函数支持变参。接受变参的函数是有着不定数量的参数的。为了做到这点，首先需要定义函数使其接受变参：
+
+```Go
+func myfunc(arg ...int) {}
+```
+
+`arg ...int`告诉Go这个函数接受不定数量的参数。注意，这些参数的类型全部是`int`。在函数体中，变量`arg`是一个`int`的`slice`：
+
+```Go
+for _, n := range arg {
+	fmt.Printf("And the number is: %d\n", n)
+}
+```
+
+### 传值与传指针
+
+当我们传一个参数值到被调用函数里面时，实际上是传了这个值的一份copy，当在被调用函数中修改参数值的时候，调用函数中相应实参不会发生任何变化，因为数值变化只作用在copy上。
+
+为了验证我们上面的说法，我们来看一个例子
+
+```Go
+package main
+
+import "fmt"
+
+//简单的一个函数，实现了参数+1的操作
+func add1(a int) int {
+	a = a+1 // 我们改变了a的值
+	return a //返回一个新值
+}
+
+func main() {
+	x := 3
+
+	fmt.Println("x = ", x)  // 应该输出 "x = 3"
+
+	x1 := add1(x)  //调用add1(x)
+
+	fmt.Println("x+1 = ", x1) // 应该输出"x+1 = 4"
+	fmt.Println("x = ", x)    // 应该输出"x = 3"
+}
+```
+
+看到了吗？虽然我们调用了`add1`函数，并且在`add1`中执行`a = a+1`操作，但是上面例子中`x`变量的值没有发生变化
+
+理由很简单：因为当我们调用`add1`的时候，`add1`接收的参数其实是`x`的copy，而不是`x`本身。
+
+那你也许会问了，如果真的需要传这个`x`本身,该怎么办呢？
+
+这就牵扯到了所谓的指针。我们知道，变量在内存中是存放于一定地址上的，修改变量实际是修改变量地址处的内存。只有`add1`函数知道`x`变量所在的地址，才能修改`x`变量的值。所以我们需要将`x`所在地址`&x`传入函数，并将函数的参数的类型由`int`改为`*int`，即改为指针类型，才能在函数中修改`x`变量的值。此时参数仍然是按copy传递的，只是copy的是一个指针。请看下面的例子
+
+```Go
+package main
+
+import "fmt"
+
+//简单的一个函数，实现了参数+1的操作
+func add1(a *int) int { // 请注意，
+	*a = *a+1 // 修改了a的值
+	return *a // 返回新值
+}
+
+func main() {
+	x := 3
+
+	fmt.Println("x = ", x)  // 应该输出 "x = 3"
+
+	x1 := add1(&x)  // 调用 add1(&x) 传x的地址
+
+	fmt.Println("x+1 = ", x1) // 应该输出 "x+1 = 4"
+	fmt.Println("x = ", x)    // 应该输出 "x = 4"
+}
+```
+
+这样，我们就达到了修改`x`的目的。那么到底传指针有什么好处呢？
+
+- 传指针使得多个函数能操作同一个对象。
+- 传指针比较轻量级 (8bytes),只是传内存地址，我们可以用指针传递体积大的结构体。如果用参数值传递的话, 在每次copy上面就会花费相对较多的系统开销（内存和时间）。所以当你要传递大的结构体的时候，用指针是一个明智的选择。
+- Go语言中`channel`，`slice`，`map`这三种类型的实现机制类似指针，所以可以直接传递，而不用取地址后传递指针。（注：若函数需改变`slice`的长度，则仍需要取地址传递指针）
+
 ### 类型转换
+
+由于Go语言不允许隐式类型转换。而类型转换和类型断言的本质，就是把一个类型转换到另一个类型。
+
+语法：<结果类型> := <目标类型> ( <表达式> )
+
+类型转换是用来在不同但相互兼容的类型之间的相互转换的方式，所以，当类型不兼容的时候，是无法转换的。如下：
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+    var var1 int = 7
+    fmt.Printf("%T->%v\n", var1, var1)
+    var2 := float32(var1)
+    var3 := int64(var1)
+    //var4 := []int8(var1)
+    //var5 := []string(var1)
+    fmt.Printf("%T->%v\n", var2, var2)
+    fmt.Printf("%T->%v\n", var3, var3)
+    //fmt.Printf("%T->%d", var4, var4)
+    //fmt.Printf("%T->%d", var5, var5)
+}
+```
+
+其中，var4和var5处运行会报错。因为类型不兼容。注释后，输出如下：
+
+```
+int->7
+float32->7
+int64->7
+```
+
+值得注意的是，如果某些类型可能引起误会，应该用括号括起来转换，如下：
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+    //创建一个int变量，并获得它的指针
+    var1 := new(int32)
+    fmt.Printf("%T->%v\n", var1, var1)
+    var2 := *int32(var1)
+    fmt.Printf("%T->%v\n", var2, var2)
+}
+```
+
+*int32(var1)相当于*(int32(var1))，一个指针，当然不能直接转换成一个int32类型，所以该表达式直接编译错误。将该表达式改为 (*int32)(var1)就可以正常输出了。
+
 ### 类型断言
+
+语法：
+
+　　<目标类型的值>，<布尔参数> := <表达式>.( 目标类型 ) // 安全类型断言
+
+　　<目标类型的值> := <表达式>.( 目标类型 )　　//非安全类型断言
+
+类型断言的本质，跟类型转换类似，都是类型之间进行转换，不同之处在于，类型断言实在接口之间进行，相当于Java中，对于一个对象，把一种接口的引用转换成另一种。
+
+我们先来看一个最简单的错误的类型断言：
+
+```go
+func test6() {
+    var i interface{} = "kk"
+    j := i.(int)
+    fmt.Printf("%T->%d\n", j, j)
+}
+```
+
+var i interface{} = "KK" 某种程度上相当于java中的，Object i = "KK";
+
+现在把这个 i 转换成 int 类型，系统内部检测到这种不匹配，就会调用内置的panic()函数，抛出一个异常。
+
+改一下，把 i 的定义改为：var i interface{} = 99，就没问题了。输出为：
+
+```
+int->99
+```
+
+以上是不安全的类型断言。我们来看一下安全的类型断言：
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+    var i interface{} = "TT"
+    j, b := i.(int)
+    if b {
+        fmt.Printf("%T->%d\n", j, j)
+    } else {
+        fmt.Println("类型不匹配")
+    }
+}
+```
+
+输出“类型不匹配”。
+
 ### error
-### defer和panic
+
+Go 语言通过内置的错误接口提供了非常简单的错误处理机制。
+
+error类型是一个接口类型，这是它的定义：
+
+```go
+type error interface {
+    Error() string
+}
+```
+
+我们可以在编码中通过实现 error 接口类型来生成错误信息。
+
+函数通常在最后的返回值中返回错误信息。使用errors.New 可返回一个错误信息：
+
+```go
+func Sqrt(f float64) (float64, error) {
+    if f < 0 {
+        return 0, errors.New("math: square root of negative number")
+    }
+    // 实现
+}
+```
+
+在下面的例子中，我们在调用Sqrt的时候传递的一个负数，然后就得到了non-nil的error对象，将此对象与nil比较，结果为true，所以fmt.Println(fmt包在处理error时会调用Error方法)被调用，以输出错误，请看下面调用的示例代码：
+
+```go
+result, err:= Sqrt(-1)
+
+if err != nil {
+   fmt.Println(err)
+}
+```
+
+实例代码
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+// 定义一个 DivideError 结构
+type DivideError struct {
+    dividee int
+    divider int
+}
+
+// 实现 `error` 接口
+func (de *DivideError) Error() string {
+    strFormat := `
+    Cannot proceed, the divider is zero.
+    dividee: %d
+    divider: 0
+`
+    return fmt.Sprintf(strFormat, de.dividee)
+}
+
+// 定义 `int` 类型除法运算的函数
+func Divide(varDividee int, varDivider int) (result int, errorMsg string) {
+    if varDivider == 0 {
+            dData := DivideError{
+                    dividee: varDividee,
+                    divider: varDivider,
+            }
+            errorMsg = dData.Error()
+            return
+    } else {
+            return varDividee / varDivider, ""
+    }
+
+}
+
+func main() {
+
+    // 正常情况
+    if result, errorMsg := Divide(100, 10); errorMsg == "" {
+            fmt.Println("100/10 = ", result)
+    }
+    // 当除数为零的时候会返回错误信息
+    if _, errorMsg := Divide(100, 0); errorMsg != "" {
+            fmt.Println("errorMsg is: ", errorMsg)
+    }
+
+}
+```
+
+
+
+
+
+### defer
+
+Go语言中有种不错的设计，即延迟（defer）语句，你可以在函数中添加多个defer语句。当函数执行到最后时，这些defer语句会按照逆序执行，最后该函数返回。特别是当你在进行一些打开资源的操作时，遇到错误需要提前返回，在返回前你需要关闭相应的资源，不然很容易造成资源泄露等问题。如下代码所示，我们一般写打开一个资源是这样操作的：
+
+```go
+func ReadWrite() bool {
+	file.Open("file")
+// 做一些工作
+	if failureX {
+		file.Close()
+		return false
+	}
+
+	if failureY {
+		file.Close()
+		return false
+	}
+
+	file.Close()
+	return true
+}
+```
+
+我们看到上面有很多重复的代码，Go的`defer`有效解决了这个问题。使用它后，不但代码量减少了很多，而且程序变得更优雅。在`defer`后指定的函数会在函数退出前调用。
+
+```go
+func ReadWrite() bool {
+	file.Open("file")
+	defer file.Close()
+	if failureX {
+		return false
+	}
+	if failureY {
+		return false
+	}
+	return true
+}
+```
+
+如果有很多调用`defer`，那么`defer`是采用后进先出模式，所以如下代码会输出`4 3 2 1 0`
+
+```Go
+for i := 0; i < 5; i++ {
+	defer fmt.Printf("%d ", i)
+}
+```
+
 ## 面向对象编程
 ### 自定义类型和结构体
 ### 方法
